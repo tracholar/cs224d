@@ -1,0 +1,4 @@
+*.py[cd]
+.ipynb_checkpoints
+*.zip
+*.pdf
