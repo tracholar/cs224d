@@ -2,3 +2,6 @@
 .ipynb_checkpoints
 *.zip
 *.pdf
+assignment*/cs224d/datasets/*/
+
+
