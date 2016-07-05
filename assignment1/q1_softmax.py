@@ -25,7 +25,8 @@ def softmax(x):
         x = x.reshape(1, len(x))
     tmp = np.max(x,axis=1)
     tmp = tmp.reshape(len(tmp) , 1)
-    x = np.exp(x - tmp)/np.sum( np.exp(x - tmp), 1)
+    tmp2 = np.sum( np.exp(x - tmp), 1)
+    x = np.exp(x - tmp)/ tmp2.reshape(tmp2.shape[0],1)
 
     ### END YOUR CODE
 

@@ -10,7 +10,8 @@ from q4_softmaxreg import softmaxRegression, getSentenceFeature, accuracy, softm
 # NOTE: fill in one more "your code here" below before running!
 REGULARIZATION = None   # Assign a list of floats in the block below
 ### YOUR CODE HERE
-raise NotImplementedError
+REGULARIZATION = np.array([0.03, 0.01, 0.003, 0.001, 0.0003, 0.0001, 0.00003, 0.00001])*0.01
+# REGULARIZATION = [1e-3]
 ### END YOUR CODE
 
 # Load the dataset
@@ -18,7 +19,7 @@ dataset = StanfordSentiment()
 tokens = dataset.tokens()
 nWords = len(tokens)
 
-# Load the word vectors we trained earlier 
+# Load the word vectors we trained earlier
 _, wordVectors0, _ = load_saved_params()
 wordVectors = (wordVectors0[:nWords,:] + wordVectors0[nWords:,:])
 dimVectors = wordVectors.shape[1]
@@ -47,10 +48,10 @@ for regularization in REGULARIZATION:
     random.seed(3141)
     np.random.seed(59265)
     weights = np.random.randn(dimVectors, 5)
-    print "Training for reg=%f" % regularization 
+    print "Training for reg=%f" % regularization
 
     # We will do batch optimization
-    weights = sgd(lambda weights: softmax_wrapper(trainFeatures, trainLabels, 
+    weights = sgd(lambda weights: softmax_wrapper(trainFeatures, trainLabels,
         weights, regularization), weights, 3.0, 10000, PRINT_EVERY=100)
 
     # Test on train set
@@ -65,9 +66,9 @@ for regularization in REGULARIZATION:
 
     # Save the results and weights
     results.append({
-        "reg" : regularization, 
-        "weights" : weights, 
-        "train" : trainAccuracy, 
+        "reg" : regularization,
+        "weights" : weights,
+        "train" : trainAccuracy,
         "dev" : devAccuracy})
 
 # Print the accuracies
@@ -76,8 +77,8 @@ print "=== Recap ==="
 print "Reg\t\tTrain\t\tDev"
 for result in results:
     print "%E\t%f\t%f" % (
-        result["reg"], 
-        result["train"], 
+        result["reg"],
+        result["train"],
         result["dev"])
 print ""
 
@@ -85,8 +86,11 @@ print ""
 BEST_REGULARIZATION = None
 BEST_WEIGHTS = None
 
-### YOUR CODE HERE 
-raise NotImplementedError
+### YOUR CODE HERE
+devAs = [r['dev'] for r in results]
+idx = np.argmax(devAs)
+BEST_REGULARIZATION = results[idx]['reg']
+BEST_WEIGHTS = results[idx]['weights']
 ### END YOUR CODE
 
 # Test your findings on the test set
@@ -111,4 +115,3 @@ plt.ylabel("accuracy")
 plt.legend(['train', 'dev'], loc='upper left')
 plt.savefig("q4_reg_v_acc.png")
 plt.show()
-

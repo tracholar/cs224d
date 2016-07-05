@@ -29,6 +29,24 @@ def getSentenceFeature(tokens, wordVectors, sentence):
 
     return sentVector
 
+def softmax_cost_func():
+    import theano
+    from theano import tensor as T
+    W = T.dmatrix('W')
+    x = T.dmatrix('x')
+    y = T.dmatrix('y')
+    N = T.scalar('N')
+    r = T.scalar('r')
+    yp = T.nnet.softmax(T.dot(x, W))
+    J = - T.sum(T.log(yp) * y) / N + 0.5 * r * T.sum(W * W)
+    dJ = T.grad(J, [W])
+    fJ = theano.function([W, x, y, N, r], J)
+    fdJ = theano.function([W, x, y, N, r], dJ)
+    fP = theano.function([W, x], T.argmax(yp, 1))
+    return fJ, fdJ, fP
+
+fJ, fdJ, fP = softmax_cost_func()
+
 def softmaxRegression(features, labels, weights, regularization = 0.0, nopredictions = False):
     """ Softmax Regression """
     # Implement softmax regression with weight regularization.
@@ -46,17 +64,21 @@ def softmaxRegression(features, labels, weights, regularization = 0.0, nopredict
     # - pred: label predictions of the regressor (you might find
     #        np.argmax helpful)
 
-    prob = softmax(features.dot(weights))
+    # prob = softmax(features.dot(weights))
     if len(features.shape) > 1:
         N = features.shape[0]
     else:
         N = 1
     # A vectorized implementation of    1/N * sum(cross_entropy(x_i, y_i)) + 1/2*|w|^2
-    cost = np.sum(-np.log(prob[range(N), labels])) / N
-    cost += 0.5 * regularization * np.sum(weights ** 2)
+    # cost = np.sum(-np.log(prob[range(N), labels])) / N
+    # cost += 0.5 * regularization * np.sum(weights ** 2)
 
     ### YOUR CODE HERE: compute the gradients and predictions
-    raise NotImplementedError
+    ground_truth = np.zeros((features.shape[0], weights.shape[1]))
+    ground_truth[range(N), labels] = 1
+    cost = fJ(weights, features, ground_truth, N, regularization)
+    grad, = fdJ(weights, features, ground_truth, N, regularization)
+    pred = fP(weights, features)
     ### END YOUR CODE
 
     if nopredictions:
