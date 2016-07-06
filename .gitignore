@@ -4,4 +4,6 @@
 *.pdf
 assignment*/cs224d/datasets/*/
 .DS_Store
+.python-version
+
 
