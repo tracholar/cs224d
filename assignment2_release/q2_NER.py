@@ -195,16 +195,17 @@ class NERModel(LanguageModel):
         W = tf.get_variable('W', [self.config.window_size * self.config.embed_size, self.config.hidden_size])
         b1 = tf.get_variable('b1', [self.config.hidden_size,])
         h = tf.nn.tanh(tf.matmul(window, W) + b1)
-        h = tf.nn.dropout(h, self.config.dropout)
+        h = tf.nn.dropout(h, self.dropout_placeholder)
 
         tf.add_to_collection('total_loss', self.config.l2 * tf.nn.l2_loss(W))
     with tf.variable_scope('Softmax'):
         U = tf.get_variable('U', [self.config.hidden_size, self.config.label_size])
         b2 = tf.get_variable('b2', [self.config.label_size])
-        output = tf.nn.softmax(tf.matmul(h, U) + b2)
+        output = (tf.matmul(h, U) + b2)
 
         tf.add_to_collection('total_loss', self.config.l2 * tf.nn.l2_loss(U))
 
+    output = tf.nn.dropout(output, self.dropout_placeholder)
     ### END YOUR CODE
     return output
 
