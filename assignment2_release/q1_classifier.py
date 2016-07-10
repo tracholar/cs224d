@@ -54,8 +54,8 @@ class SoftmaxModel(Model):
     (Don't change the variable names)
     """
     ### YOUR CODE HERE
-    self.input_placeholder = tf.placeholders(tf.float32, shape=(self.config.batch_size, self.config.n_features))
-    self.labels_placeholder = tf.placeholders(tf.int32, shape=(self.config.batch_size, self.config.n_features))
+    self.input_placeholder = tf.placeholder(tf.float32, shape=(self.config.batch_size, self.config.n_features))
+    self.labels_placeholder = tf.placeholder(tf.int32, shape=(self.config.batch_size, self.config.n_classes))
     ### END YOUR CODE
 
   def create_feed_dict(self, input_batch, label_batch):
@@ -81,8 +81,8 @@ class SoftmaxModel(Model):
     """
     ### YOUR CODE HERE
     feed_dict = {
-        input_placeholder : input_batch,
-        label_batch : label_batch
+        self.input_placeholder : input_batch,
+        self.labels_placeholder : label_batch
     }
     ### END YOUR CODE
     return feed_dict
@@ -107,7 +107,7 @@ class SoftmaxModel(Model):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    opt = tf.train.GradientDescentOptimizer()
+    opt = tf.train.GradientDescentOptimizer(self.config.lr)
     train_op = opt.minimize(loss)
     ### END YOUR CODE
     return train_op
@@ -132,8 +132,8 @@ class SoftmaxModel(Model):
       out: A tensor of shape (batch_size, n_classes)
     """
     ### YOUR CODE HERE
-    W = tf.Variables(tf.zeros([self.config.n_features, self.config.n_classes]))
-    b = tf.Variables(tf.zeros([self.config.n_classes]))
+    W = tf.Variable(tf.zeros([self.config.n_features, self.config.n_classes]))
+    b = tf.Variable(tf.zeros([1, self.config.n_classes]))
     out = softmax(tf.matmul(input_data, W) + b)
     ### END YOUR CODE
     return out
@@ -149,7 +149,8 @@ class SoftmaxModel(Model):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    # print self.input_labels.shape, pred.get_shape()
+    loss = cross_entropy_loss(self.labels_placeholder, pred)
     ### END YOUR CODE
     return loss
 
@@ -227,7 +228,6 @@ def test_SoftmaxModel():
   config = Config()
   with tf.Graph().as_default():
     model = SoftmaxModel(config)
-
     # Create a session for running Ops on the Graph.
     sess = tf.Session()
 
@@ -241,6 +241,7 @@ def test_SoftmaxModel():
   # rapidly.
   assert losses[-1] < .5
   print "Basic (non-exhaustive) classifier tests pass\n"
+
 
 if __name__ == "__main__":
     test_SoftmaxModel()
